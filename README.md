@@ -1,4 +1,4 @@
-# currentweather plus
+# weather plus
 
 Modified MagicMirror2 currentweather with new options, Pressure in mmHg,  Visibility in km, min & max temp and weather description
 
