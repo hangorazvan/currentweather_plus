@@ -1,5 +1,7 @@
 # weather plus
 
+https://github.com/hangorazvan/weather_plus
+
 Modified MagicMirror2 currentweather with new options, Pressure in mmHg,  Visibility in km, min & max temp and weather description
 
 <img src=https://github.com/hangorazvan/weather_plus/blob/master/preview.png>
