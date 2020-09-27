@@ -319,13 +319,13 @@ Module.register("weather_plus",{
 				}
 			} else feelsLike.className = "dimmed real";
 
-			feelsLike.innerHTML = "<span class=normal>" + this.translate("FEELS") + "</span> " + this.feelsLike + "&deg;" + degreeLabel;
+			feelsLike.innerHTML = "<span class=normal> În " + this.fetchedLocationName + " " + this.translate("FEELS") + "</span> " + this.feelsLike + "&deg;" + degreeLabel;
 			small.appendChild(feelsLike);
 
 			if (this.config.showDescription) {
 				var description = document.createElement("div"); 		// weather description.
 				description.className = "dimmed descr";
-				description.innerHTML = "<span class=lime>" + this.translate("NOW: ") + "</span> " + this.desc + ", ";
+				description.innerHTML = this.translate("NOW") + ": <span class=bright>" + this.desc + "</span>";
 				small.appendChild(description);
 			}
 
