@@ -2,7 +2,7 @@
 
 https://github.com/hangorazvan/weather_plus
 
-Modified MagicMirror2 currentweather with new options, Pressure in mmHg,  Visibility in km, min & max temp and weather description
+Modified MagicMirror2 currentweather with new options, Pressure in mmHg,  Visibility in km, min & max temp and weather description (under development)
 
 <img src=https://github.com/hangorazvan/weather_plus/blob/master/preview.png>
 Do not make modification and do not replace the default, just add <i>disable: true</i> in config.js and use this one as 3rd party,
