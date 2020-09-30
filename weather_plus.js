@@ -63,11 +63,17 @@ Module.register("weather_plus",{
 		},
 	},
 
-	firstEvent: true,
+	firstEvent: false,
+
+	// create a variable to hold the location name based on the API result.
 	fetchedLocationName: "",
 
-	getStyles: function () {
-		return ["weather_plus.css"];
+	// Define required translations.
+	getTranslations: function () {
+		// The translations for the default modules are defined in the core translation files.
+		// Therefor we can just return false. Otherwise we should have returned a dictionary.
+		// If you're trying to build your own module including translations, check out the documentation.
+		return false;
 	},
 
 	// Define start sequence.
@@ -77,130 +83,18 @@ Module.register("weather_plus",{
 		// Set locale.
 		moment.locale(config.language);
 
-		this.windSpeed = null;
-		this.windDirection = null;
-		this.windDeg = null;
-		this.sunriseSunsetTime = null;
-		this.sunriseSunsetIcon = null;
-		this.temperature = null;
-		this.indoorTemperature = null;
-		this.indoorHumidity = null;
-		this.weatherType = null;
-		this.feelsLike = null;
-		this.minTemp = null;								// min temperature.
-		this.maxTemp = null;								// max temperature.
-		this.desc = null;	 								// weather description.
-		this.rain = null;	 								// rain.
-		this.snow = null;	 								// snow.
-		this.pressure = null;	 							// main pressure.
-		this.visibility = null;	 							// visibility.
+		this.forecast = [];
 		this.loaded = false;
 		this.scheduleUpdate(this.config.initialLoadDelay);
-	},
 
-	// add extra information of current weather
-	// windDirection, humidity, sunrise and sunset
-	addExtraInfoWeather: function (wrapper) {
-		var small = document.createElement("div");
-		small.className = "normal xmedium wis";
-
-		var windIcon = document.createElement("span");
-		windIcon.className = "wi wi-strong-wind dimmed";
-		small.appendChild(windIcon);
-
-		var windSpeed = document.createElement("span");
-		if (this.windSpeed > 50 && this.windSpeed < 75) {
-			windSpeed.className = "wisw lightblue";
-		} else if (this.windSpeed > 75 && this.windSpeed < 100) {
-			windSpeed.className = "wisw yellow";
-		} else if (this.windSpeed > 100) {
-			windSpeed.className = "wisw coral";
-		} else windSpeed.className = "wisw";
-		windSpeed.innerHTML = " " + this.windSpeed + "<span class=\"subs\"> km/h</span>";
-		small.appendChild(windSpeed);
-
-		if (this.config.showWindDirection) {
-			var windDirection = document.createElement("span");
-			windDirection.className = "sups";
-			if (this.config.showWindDirectionAsArrow) {
-				if (this.windDeg !== null) {
-					windDirection.innerHTML = "<i class=\"fa fa-long-arrow-down\" style=\"transform:rotate("+this.windDeg+"deg);\"></i>";
-				}
-			} else {
-				windDirection.innerHTML = this.translate(this.windDirection);
-			}
-			small.appendChild(windDirection);
-		}
-
-		if (this.config.showPressure) {
-			var pressureIcon = document.createElement("span");
-			pressureIcon.className = "wi wi-thermometer dimmed";
-			small.appendChild(pressureIcon);
-
-			var pressure = document.createElement("span"); 			// main pressure.
-			var atpressure = Math.round(this.pressure * 750.062 / 1000)
-				if (atpressure < 700) {
-				    pressure.className = "pressure lightblue";
-				} else if (atpressure > 800) {
-				    pressure.className = "pressure yellow";
-				} else pressure.className = "pressure";
-			pressure.innerHTML = Math.round(this.pressure * 750.062 / 1000) + "<span class=\"subs\"> Hg</span><span class=\"sups\">mm</span>";
-			small.appendChild(pressure);
-		}
-
-		if (this.config.showVisibility) {
-			var visibilityIcon = document.createElement("span");
-			visibilityIcon.className = "wi wi-alien dimmed";
-			small.appendChild(visibilityIcon);
-
-			var visibility = document.createElement("span"); 			// visibility.
-			visibility.className = "visibility";
-			visibility.innerHTML = this.visibility / 1000 + "<span class=\"subs\"> km</span> ";
-			small.appendChild(visibility);
-		}
-
-//		var spacer = document.createElement("span");
-//		spacer.innerHTML = "&nbsp;";
-//		small.appendChild(spacer);
-
-		if (this.config.showHumidity) {
-			var humidityIcon = document.createElement("span");
-			humidityIcon.className = "wi wi-humidity humidityIcon";
-			humidityIcon.innerHTML = "";
-			
-			var humidity = document.createElement("span");
-			if (this.humidity < 30) {
-			    humidity.className = "wish lightblue";
-			} else if (this.humidity > 50 && this.humidity < 80) {
-			    humidity.className = "wish yellow";
-			} else if (this.humidity > 80) {
-			    humidity.className = "wish coral";
-			} else humidity.className = "wish";
-			humidity.innerHTML = this.humidity + "%";
-			small.appendChild(humidityIcon);
-			small.appendChild(humidity);
-		}
-
-		if (this.config.showSun) {
-			var sunriseSunsetIcon = document.createElement("span");
-			sunriseSunsetIcon.className = "wi dimmed " + this.sunriseSunsetIcon;
-			small.appendChild(sunriseSunsetIcon);
-
-			var sunriseSunsetTime = document.createElement("span");
-			sunriseSunsetTime.className = "wiss";
-			sunriseSunsetTime.innerHTML = " " + this.sunriseSunsetTime;
-			small.appendChild(sunriseSunsetTime);
-		}
-
-		wrapper.appendChild(small);
+		this.updateTimer = null;
 	},
 
 	// Override dom generator.
 	getDom: function () {
 		var wrapper = document.createElement("div");
-		wrapper.className = this.config.tableClass;
 
-		if (this.config.appid === "") {
+		if (this.config.appid === "" || this.config.appid === "YOUR_OPENWEATHER_API_KEY") {
 			wrapper.innerHTML = "Please set the correct openweather <i>appid</i> in the config for module: " + this.name + ".";
 			wrapper.className = "dimmed light small";
 			return wrapper;
@@ -209,160 +103,124 @@ Module.register("weather_plus",{
 		if (!this.loaded) {
 			wrapper.innerHTML = this.translate("LOADING");
 			wrapper.className = "dimmed light small";
+
+			if (this.config.reload) {
+				this.scheduleUpdate(this.config.initialLoadDelay);
+			}
+
 			return wrapper;
 		}
 
-		if (this.config.onlyTemp === false) {
-			this.addExtraInfoWeather(wrapper);
-		}
+		var table = document.createElement("table");
+		table.className = this.config.tableClass;
 
-		var large = document.createElement("div");
-		large.className = "light";
+		for (var f in this.forecast) {
+			var forecast = this.forecast[f];
 
-		var degreeLabel = "";
-		if (this.config.units === "metric" || this.config.units === "imperial") {
-			degreeLabel;
-		}
-		if (this.config.degreeLabel) {
-			switch (this.config.units) {
-				case "metric":
-					degreeLabel += "C";
-					break;
-				case "imperial":
-					degreeLabel += "F";
-					break;
-				case "default":
-					degreeLabel += "K";
-					break;
+			var row = document.createElement("tr");
+			if (this.config.colored) {
+				row.className = "colored";
 			}
-		}
+			table.appendChild(row);
 
-		if (this.config.decimalSymbol === "") {
-			this.config.decimalSymbol = ".";
-		}
+			var dayCell = document.createElement("td");
+			dayCell.className = "day";
+			dayCell.innerHTML = forecast.day;
+			row.appendChild(dayCell);
 
-		if (this.config.hideTemp === false) {
-			var weatherIcon = document.createElement("span");
-			weatherIcon.className = "wicon wi weathericon " + this.weatherType;
-			large.appendChild(weatherIcon);
+			var iconCell = document.createElement("td");
+			iconCell.className = "bright weather-icon";
+			row.appendChild(iconCell);
 
-			var temperature = document.createElement("span");
-			temperature.className = "wtemp bright light xlarge ";
-			temperature.innerHTML = " " + this.temperature.replace(".", this.config.decimalSymbol) + "&deg;<span class=\"deg shade\">" + degreeLabel + "</span>";
-			large.appendChild(temperature);
-		}
+			var icon = document.createElement("span");
+			icon.className = "wi weathericon " + forecast.icon;
+			iconCell.appendChild(icon);
 
-		if (this.config.showIndoorTemperature && this.indoorTemperature) {
-			var indoorIcon = document.createElement("span");
-			indoorIcon.className = "fa fa-home";
-			large.appendChild(indoorIcon);
-
-			var indoorTemperatureElem = document.createElement("span");
-			indoorTemperatureElem.className = "bright";
-			indoorTemperatureElem.innerHTML = " " + this.indoorTemperature.replace(".", this.config.decimalSymbol) + degreeLabel;
-			large.appendChild(indoorTemperatureElem);
-		}
-
-		if (this.config.showIndoorHumidity && this.indoorHumidity) {
-			var indoorHumidityIcon = document.createElement("span");
-			indoorHumidityIcon.className = "fa fa-tint";
-			large.appendChild(indoorHumidityIcon);
-
-			var indoorHumidityElem = document.createElement("span");
-			indoorHumidityElem.className = "bright";
-			indoorHumidityElem.innerHTML = " " + this.indoorHumidity + "%";
-			large.appendChild(indoorHumidityElem);
-		}
-
-		wrapper.appendChild(large);
-
-		if (this.config.showFeelsLike && this.config.onlyTemp === false) {
-			var small = document.createElement("div");
-			small.className = "normal ssmall rfd ";
-
-			var feelsLike = document.createElement("span");
-						if (this.config.units == "metric") {
-				if (this.feelsLike >= 45) {
-					feelsLike.className = "real redrf";
-				} else if (this.feelsLike >= 40 && this.feelsLike < 45) {
-					feelsLike.className = "real orangered";
-				} else if (this.feelsLike >= 35 && this.feelsLike < 40) {
-					feelsLike.className = "real tomato";
-				} else if (this.feelsLike >= 30 && this.feelsLike < 35) {
-					feelsLike.className = "real coral";
-				} else if (this.feelsLike >= 25 && this.feelsLike < 30) {
-					feelsLike.className = "real darkorange";
-				} else if (this.feelsLike >= 20 && this.feelsLike < 25) {
-					feelsLike.className = "real gold";
-				} else if (this.feelsLike >= 15 && this.feelsLike < 20) {
-					feelsLike.className = "real yellow";
-				} else if (this.feelsLike >= 10 && this.feelsLike < 15) {
-					feelsLike.className = "real greenyellow";
-				} else if (this.feelsLike >= 5 && this.feelsLike < 10) {
-					feelsLike.className = "real chartreuse";
-				} else if (this.feelsLike >= 0 && this.feelsLike < 5) {
-					feelsLike.className = "real lawngreen";
-				} else if (this.feelsLike >= -5 && this.feelsLike < 0) {
-					feelsLike.className = "real lime";
-				} else if (this.feelsLike >= -10 && this.feelsLike < -5) {
-					feelsLike.className = "real powderblue";
-				} else if (this.feelsLike >= -15 && this.feelsLike < -10) {
-					feelsLike.className = "real lightblue";
-				} else if (this.feelsLike >= -20 && this.feelsLike < -15) {
-					feelsLike.className = "real skyblue";
-				} else if (this.feelsLike >= -25 && this.feelsLike < -20) {
-					feelsLike.className = "real lightskyblue";
-				} else if (this.feelsLike >= -30 && this.feelsLike < -25) {
-					feelsLike.className = "real deepskyblue";
-				} else if (this.feelsLike < 30) {
-					feelsLike.className = "real dodgerblue";
+			var degreeLabel = "";
+			if (this.config.units === "metric" || this.config.units === "imperial") {
+				degreeLabel += "&deg;";
+			}
+			if (this.config.scale) {
+				switch (this.config.units) {
+					case "metric":
+						degreeLabel += "C";
+						break;
+					case "imperial":
+						degreeLabel += "F";
+						break;
+					case "default":
+						degreeLabel = "K";
+						break;
 				}
-			} else feelsLike.className = "dimmed real";
-
-			feelsLike.innerHTML = "<span class=normal> În " + this.fetchedLocationName + " " + this.translate("FEELS") + "</span> " + this.feelsLike + "&deg;" + degreeLabel;
-			small.appendChild(feelsLike);
-
-			if (this.config.showDescription) {
-				var description = document.createElement("div"); 		// weather description.
-				description.className = "dimmed descr";
-				description.innerHTML = this.translate("NOW") + ": <span class=bright>" + this.desc + "</span>";
-				small.appendChild(description);
 			}
 
-			if (this.config.showMinMax) {
-				var maxTemp = document.createElement("span"); 			// max temperature.
-				maxTemp.className = "maxTemp mmx";
-				maxTemp.innerHTML = "<span class=\"lime\">" + moment().format("HH:mm") + ":&nbsp; </span><span class=\"minMax\">max.</span>&nbsp;" + this.roundValue(this.maxTemp.toFixed(1).replace(".", this.config.decimalSymbol)) + "&deg;" + degreeLabel;
-				small.appendChild(maxTemp);
-	    		
-				var minTemp = document.createElement("span"); 			// min temperature.
-				minTemp.className = "minTemp mmx";
-				minTemp.innerHTML = "&nbsp; <span class=\"minMax\">min.</span>&nbsp;" + this.roundValue(this.minTemp.toFixed(1).replace(".", this.config.decimalSymbol)) + "&deg;" + degreeLabel;
-				small.appendChild(minTemp);
+			if (this.config.decimalSymbol === "" || this.config.decimalSymbol === " ") {
+				this.config.decimalSymbol = ".";
+			}
 
-				var rains = document.createElement("span"); 				// rain.
-				rains.className = "mmx";
-				if ((isNaN(this.rain)) || (isNaN(this.snow))) {
-					rains.innerHTML = "&nbsp; <i class=\"wi wi-small-craft-advisory lime\"></i>&nbsp;" + this.translate("No rain");
-				} else if (isNaN(this.rain)) {
-					rains.innerHTML = "&nbsp; <i class=\"wi wi-snowflake-cold lightblue\"></i>&nbsp;" + parseFloat(this.snow["1h"]).toFixed(1).replace(".", this.config.decimalSymbol) + "&nbsp;mm";
-				} else if (isNaN(this.snow)) {
-					rains.innerHTML = "&nbsp; <i class=\"wi wi-umbrella yellow\"></i>&nbsp;" + parseFloat(this.rain["1h"]).toFixed(1).replace(".", this.config.decimalSymbol) + "&nbsp;mm";
+			var maxTempCell = document.createElement("td");
+			maxTempCell.innerHTML = forecast.maxTemp.replace(".", this.config.decimalSymbol) + degreeLabel;
+			maxTempCell.className = "align-right bright max-temp";
+			row.appendChild(maxTempCell);
+
+			var minTempCell = document.createElement("td");
+			minTempCell.innerHTML = forecast.minTemp.replace(".", this.config.decimalSymbol) + degreeLabel;
+			minTempCell.className = "align-right min-temp";
+			row.appendChild(minTempCell);
+
+			if (this.config.showRainAmount) {
+				var rainCell = document.createElement("td");
+				if (isNaN(forecast.rain)) {
+					rainCell.className = "align-right shade";
+					rainCell.innerHTML = this.translate("No rain");
+				} else {
+					if (config.units !== "imperial") {
+						rainCell.innerHTML = "<i class=\"wi wi-umbrella skyblue\"></i>&nbsp;" + parseFloat(forecast.rain).toFixed(1).replace(".", this.config.decimalSymbol) + " mm";
+					} else {
+						rainCell.innerHTML = "<i class=\"wi wi-umbrella skyblue\"></i>&nbsp;" + (parseFloat(forecast.rain) / 25.4).toFixed(2).replace(".", this.config.decimalSymbol) + " in";
+					}
 				}
-				small.appendChild(rains);
+				rainCell.className = "align-right bright rain";
+				row.appendChild(rainCell);
 			}
-			wrapper.appendChild(small);
+
+			if (this.config.showSnowAmount) {
+				var winter = moment().format("MM");
+				if ((winter >= "01" && winter <= "03") || (winter >= "11" && winter <= "12")) {
+					var snowCell = document.createElement("td");
+					if (isNaN(forecast.snow)) {
+						snowCell.className = "align-right shade";
+						snowCell.innerHTML = this.translate("No snow");
+					} else {
+						if(config.units !== "imperial") {
+							snowCell.innerHTML = "<i class=\"wi wi-snowflake-cold lightblue\"></i>" + parseFloat(forecast.snow).toFixed(1).replace(".", this.config.decimalSymbol) + " mm";
+						} else {
+							snowCell.innerHTML = "<i class=\"wi wi-snowflake-cold lightblue\"></i>" + (parseFloat(forecast.snow) / 25.4).toFixed(2).replace(".", this.config.decimalSymbol) + " in";
+						}
+					}
+					snowCell.className = "align-right bright snow";
+					row.appendChild(snowCell);
+				}
+			}
+
+			if (this.config.fade && this.config.fadePoint < 1) {
+				if (this.config.fadePoint < 0) {
+					this.config.fadePoint = 0;
+				}
+				var startingPoint = this.forecast.length * this.config.fadePoint;
+				var steps = this.forecast.length - startingPoint;
+				if (f >= startingPoint) {
+					var currentStep = f - startingPoint;
+					row.style.opacity = 1 - (1 / steps) * currentStep;
+				}
+			}
 		}
 
-		return wrapper;
+		return table;
 	},
 
 	// Override getHeader method.
 	getHeader: function () {
-		if (this.config.useLocationAsHeader && this.config.location !== false) {
-			return this.config.location;
-		}
-
 		if (this.config.appendLocationNameToHeader) {
 			if (this.data.header) return this.data.header + " " + this.fetchedLocationName;
 			else return this.fetchedLocationName;
@@ -393,27 +251,19 @@ Module.register("weather_plus",{
 				}
 			}
 		}
-		if (notification === "INDOOR_TEMPERATURE") {
-			this.indoorTemperature = this.roundValue(payload);
-			this.updateDom(this.config.animationSpeed);
-		}
-		if (notification === "INDOOR_HUMIDITY") {
-			this.indoorHumidity = this.roundValue(payload);
-			this.updateDom(this.config.animationSpeed);
-		}
 	},
 
 	/* updateWeather(compliments)
 	 * Requests new data from openweather.org.
-	 * Calls processWeather on succesfull response.
+	 * Calls processWeather on successful response.
 	 */
 	updateWeather: function () {
 		if (this.config.appid === "") {
-			Log.error("CurrentWeather: APPID not set!");
+			Log.error("WeatherForecast: APPID not set!");
 			return;
 		}
 
-		var url = this.config.apiBase + this.config.apiVersion + "/" + this.config.weatherEndpoint + this.getParams();
+		var url = this.config.apiBase + this.config.apiVersion + "/" + this.config.forecastEndpoint + this.getParams();
 		var self = this;
 		var retry = true;
 
@@ -426,7 +276,11 @@ Module.register("weather_plus",{
 				} else if (this.status === 401) {
 					self.updateDom(self.config.animationSpeed);
 
-					Log.error(self.name + ": Incorrect APPID.");
+					if (self.config.forecastEndpoint === "forecast/daily") {
+						self.config.forecastEndpoint = "forecast";
+						Log.warn(self.name + ": Your AppID does not support long term forecasts. Switching to fallback endpoint.");
+					}
+
 					retry = true;
 				} else {
 					Log.error(self.name + ": Could not load weather.");
@@ -449,6 +303,8 @@ Module.register("weather_plus",{
 		var params = "?";
 		if (this.config.locationID) {
 			params += "id=" + this.config.locationID;
+		} else if (this.config.lat && this.config.lon) {
+			params += "lat=" + this.config.lat + "&lon=" + this.config.lon;
 		} else if (this.config.location) {
 			params += "q=" + this.config.location;
 		} else if (this.firstEvent && this.firstEvent.geo) {
@@ -460,11 +316,35 @@ Module.register("weather_plus",{
 			return;
 		}
 
+		var numberOfDays;
+		if (this.config.forecastEndpoint === "forecast") {
+			numberOfDays = this.config.maxNumberOfDays < 1 || this.config.maxNumberOfDays > 5 ? 5 : this.config.maxNumberOfDays;
+			// don't get forecasts for the next day, as it would not represent the whole day
+		//	numberOfDays = numberOfDays * 8 - (Math.round(new Date().getHours() / 3) % 8);
+		} else {
+			numberOfDays = this.config.maxNumberOfDays < 1 || this.config.maxNumberOfDays > 17 ? 7 : this.config.maxNumberOfDays;
+		}
+		params += "&cnt=" + numberOfDays;
+		params += "&exclude=" + this.config.excludes;
 		params += "&units=" + this.config.units;
 		params += "&lang=" + this.config.lang;
 		params += "&APPID=" + this.config.appid;
 
 		return params;
+	},
+
+	/*
+	 * parserDataWeather(data)
+	 *
+	 * Use the parse to keep the same struct between daily and forecast Endpoint
+	 * from openweather.org
+	 *
+	 */
+	parserDataWeather: function (data) {
+		if (data.hasOwnProperty("main")) {
+			data["temp"] = { min: data.main.temp_min, max: data.main.temp_max };
+		}
+		return data;
 	},
 
 	/* processWeather(data)
@@ -473,130 +353,80 @@ Module.register("weather_plus",{
 	 * argument data object - Weather information received form openweather.org.
 	 */
 	processWeather: function (data) {
-		if (!data || !data.main || typeof data.main.temp === "undefined") {
-			// Did not receive usable new data.
-			// Maybe this needs a better check?
-			return;
-		}
-
-		this.humidity = parseFloat(data.main.humidity);
-		this.temperature = this.roundValue(data.main.temp);
-		this.fetchedLocationName = data.name;
-		this.feelsLike = 0;
-		this.desc = data.weather[0].description;		// weather description.
-		this.pressure = data.main.pressure;				// main pressure.
-		this.visibility = data.visibility;				// visibility.
-		this.minTemp = data.main.temp_min;				// min temperature.
-		this.maxTemp = data.main.temp_max;				// max temperature.
-		this.rain = data.rain;							// rain.
-		this.snow = data.snow;							// snow.
-
-		if (this.config.useBeaufort) {
-			this.windSpeed = this.ms2Beaufort(this.roundValue(data.wind.speed));
-		} else if (this.config.useKMPHwind) {
-			this.windSpeed = parseFloat((data.wind.speed * 60 * 60) / 1000).toFixed(0);
+		// Forcast16 (paid) API endpoint provides this data.  Onecall endpoint
+		// does not.
+		if (data.city) {
+			this.fetchedLocationName = data.city.name + ", " + data.city.country;
+		} else if (this.config.location) {
+			this.fetchedLocationName = this.config.location;
 		} else {
-			this.windSpeed = parseFloat(data.wind.speed).toFixed(0);
+			this.fetchedLocationName = "Unknown";
 		}
 
-		// ONLY WORKS IF TEMP IN C //
-		var windInMph = parseFloat(data.wind.speed * 2.23694);
+		this.forecast = [];
+		var lastDay = null;
+		var forecastData = {};
 
-		var tempInF = 0;
-		switch (this.config.units) {
-			case "metric":
-				tempInF = 1.8 * this.temperature + 32;
-				break;
-			case "imperial":
-				tempInF = this.temperature;
-				break;
-			case "default":
-				tempInF = 1.8 * (this.temperature - 273.15) + 32;
-				break;
-		}
-
-		if (windInMph > 3 && tempInF < 50) {
-			// windchill
-			var windChillInF = Math.round(35.74 + 0.6215 * tempInF - 35.75 * Math.pow(windInMph, 0.16) + 0.4275 * tempInF * Math.pow(windInMph, 0.16));
-			var windChillInC = (windChillInF - 32) * (5 / 9);
-			// this.feelsLike = windChillInC.toFixed(0);
-
-			switch (this.config.units) {
-				case "metric":
-					this.feelsLike = windChillInC.toFixed(0);
-					break;
-				case "imperial":
-					this.feelsLike = windChillInF.toFixed(0);
-					break;
-				case "default":
-					this.feelsLike = (windChillInC + 273.15).toFixed(0);
-					break;
-			}
-		} else if (tempInF > 80 && this.humidity > 40) {
-			// heat index
-			var Hindex =
-				-42.379 +
-				2.04901523 * tempInF +
-				10.14333127 * this.humidity -
-				0.22475541 * tempInF * this.humidity -
-				6.83783 * Math.pow(10, -3) * tempInF * tempInF -
-				5.481717 * Math.pow(10, -2) * this.humidity * this.humidity +
-				1.22874 * Math.pow(10, -3) * tempInF * tempInF * this.humidity +
-				8.5282 * Math.pow(10, -4) * tempInF * this.humidity * this.humidity -
-				1.99 * Math.pow(10, -6) * tempInF * tempInF * this.humidity * this.humidity;
-
-			switch (this.config.units) {
-				case "metric":
-					this.feelsLike = parseFloat((Hindex - 32) / 1.8).toFixed(0);
-					break;
-				case "imperial":
-					this.feelsLike = Hindex.toFixed(0);
-					break;
-				case "default":
-					var tc = parseFloat((Hindex - 32) / 1.8) + 273.15;
-					this.feelsLike = tc.toFixed(0);
-					break;
-			}
+		// Handle different structs between forecast16 and onecall endpoints
+		var forecastList = null;
+		if (data.list) {
+			forecastList = data.list;
+		} else if (data.daily) {
+			forecastList = data.daily;
 		} else {
-			this.feelsLike = parseFloat(this.temperature).toFixed(0);
+			Log.error("Unexpected forecast data");
+			return undefined;
 		}
 
-		this.windDirection = this.deg2Cardinal(data.wind.deg);
-		this.windDeg = data.wind.deg;
-		this.weatherType = this.config.iconTable[data.weather[0].icon];
+		for (var i = 0, count = forecastList.length; i < count; i++) {
+			var forecast = forecastList[i];
+			forecast = this.parserDataWeather(forecast); // hack issue #1017
 
-		var now = new Date();
-		var sunrise = new Date(data.sys.sunrise * 1000);
-		var sunset = new Date(data.sys.sunset * 1000);
+			var day;
+			var hour;
+			if (forecast.dt_txt) {
+				day = moment(forecast.dt_txt, "YYYY-MM-DD hh:mm:ss").format(this.config.fullday);
+				hour = moment(forecast.dt_txt, "YYYY-MM-DD hh:mm:ss").format("H");
+			} else {
+				day = moment(forecast.dt, "X").format("ddd");
+				hour = moment(forecast.dt, "X").format("H");
+			}
 
-		// The moment().format('h') method has a bug on the Raspberry Pi.
-		// So we need to generate the timestring manually.
-		// See issue: https://github.com/MichMich/MagicMirror/issues/181
-		var sunriseSunsetDateObject = sunrise < now && sunset > now ? sunset : sunrise;
-		var timeString = moment(sunriseSunsetDateObject).format("HH:mm");
-		if (this.config.timeFormat !== 24) {
-			//var hours = sunriseSunsetDateObject.getHours() % 12 || 12;
-			if (this.config.showPeriod) {
-				if (this.config.showPeriodUpper) {
-					//timeString = hours + moment(sunriseSunsetDateObject).format(':mm A');
-					timeString = moment(sunriseSunsetDateObject).format("h:mm A");
-				} else {
-					//timeString = hours + moment(sunriseSunsetDateObject).format(':mm a');
-					timeString = moment(sunriseSunsetDateObject).format("h:mm a");
+			if (day !== lastDay) {
+				forecastData = {
+					day: day,
+					icon: this.config.iconTable[forecast.weather[0].icon],
+					maxTemp: this.roundValue(forecast.temp.max),
+					minTemp: this.roundValue(forecast.temp.min),
+					rain: this.processRain(forecast, forecastList),
+					snow: this.processSnow(forecast, forecastList),
+				};
+
+				this.forecast.push(forecastData);
+				lastDay = day;
+
+				// Stop processing when maxNumberOfDays is reached
+				if (this.forecast.length === this.config.maxNumberOfDays) {
+					break;
 				}
 			} else {
-				//timeString = hours + moment(sunriseSunsetDateObject).format(':mm');
-				timeString = moment(sunriseSunsetDateObject).format("h:mm");
+				//Log.log("Compare max: ", forecast.temp.max, parseFloat(forecastData.maxTemp));
+				forecastData.maxTemp = forecast.temp.max > parseFloat(forecastData.maxTemp) ? this.roundValue(forecast.temp.max) : forecastData.maxTemp;
+				//Log.log("Compare min: ", forecast.temp.min, parseFloat(forecastData.minTemp));
+				forecastData.minTemp = forecast.temp.min < parseFloat(forecastData.minTemp) ? this.roundValue(forecast.temp.min) : forecastData.minTemp;
+
+				// Since we don't want an icon from the start of the day (in the middle of the night)
+				// we update the icon as long as it's somewhere during the day.
+				if (hour >= 6 && hour <= 18) {
+					forecastData.icon = this.config.iconTable[forecast.weather[0].icon];
+				}
 			}
 		}
 
-		this.sunriseSunsetTime = timeString;
-		this.sunriseSunsetIcon = sunrise < now && sunset > now ? "wi-sunset" : "wi-sunrise";
-
+		//Log.log(this.forecast);
 		this.show(this.config.animationSpeed, { lockString: this.identifier });
 		this.loaded = true;
 		this.updateDom(this.config.animationSpeed);
-		this.sendNotification("CURRENTWEATHER_DATA", { data: data });
 	},
 
 	/* scheduleUpdate()
@@ -611,7 +441,8 @@ Module.register("weather_plus",{
 		}
 
 		var self = this;
-		setTimeout(function () {
+		clearTimeout(this.updateTimer);
+		this.updateTimer = setTimeout(function () {
 			self.updateWeather();
 		}, nextLoad);
 	},
@@ -639,42 +470,6 @@ Module.register("weather_plus",{
 		return 12;
 	},
 
-	deg2Cardinal: function (deg) {
-		if (deg > 11.25 && deg <= 33.75) {
-			return "NNE";
-		} else if (deg > 33.75 && deg <= 56.25) {
-			return "NE";
-		} else if (deg > 56.25 && deg <= 78.75) {
-			return "ENE";
-		} else if (deg > 78.75 && deg <= 101.25) {
-			return "E";
-		} else if (deg > 101.25 && deg <= 123.75) {
-			return "ESE";
-		} else if (deg > 123.75 && deg <= 146.25) {
-			return "SE";
-		} else if (deg > 146.25 && deg <= 168.75) {
-			return "SSE";
-		} else if (deg > 168.75 && deg <= 191.25) {
-			return "S";
-		} else if (deg > 191.25 && deg <= 213.75) {
-			return "SSW";
-		} else if (deg > 213.75 && deg <= 236.25) {
-			return "SW";
-		} else if (deg > 236.25 && deg <= 258.75) {
-			return "WSW";
-		} else if (deg > 258.75 && deg <= 281.25) {
-			return "W";
-		} else if (deg > 281.25 && deg <= 303.75) {
-			return "WNW";
-		} else if (deg > 303.75 && deg <= 326.25) {
-			return "NW";
-		} else if (deg > 326.25 && deg <= 348.75) {
-			return "NNW";
-		} else {
-			return "N";
-		}
-	},
-
 	/* function(temperature)
 	 * Rounds a temperature to 1 decimal or integer (depending on config.roundTemp).
 	 *
@@ -685,5 +480,67 @@ Module.register("weather_plus",{
 	roundValue: function (temperature) {
 		var decimals = this.config.roundTemp ? 0 : 1;
 		return parseFloat(temperature).toFixed(decimals);
+	},
+
+	/* processRain(forecast, allForecasts)
+	 * Calculates the amount of rain for a whole day even if long term forecasts isn't available for the appid.
+	 *
+	 * When using the the fallback endpoint forecasts are provided in 3h intervals and the rain-property is an object instead of number.
+	 * That object has a property "3h" which contains the amount of rain since the previous forecast in the list.
+	 * This code finds all forecasts that is for the same day and sums the amount of rain and returns that.
+	 */
+	processRain: function (forecast, allForecasts) {
+		//If the amount of rain actually is a number, return it
+		if (!isNaN(forecast.rain)) {
+			return forecast.rain;
+		}
+
+		//Find all forecasts that is for the same day
+		var checkDateTime = forecast.dt_txt ? moment(forecast.dt_txt, "YYYY-MM-DD hh:mm:ss") : moment(forecast.dt, "X");
+		var daysForecasts = allForecasts.filter(function (item) {
+			var itemDateTime = item.dt_txt ? moment(item.dt_txt, "YYYY-MM-DD hh:mm:ss") : moment(item.dt, "X");
+			return itemDateTime.isSame(checkDateTime, "day") && item.rain instanceof Object;
+		});
+
+		//If no rain this day return undefined so it wont be displayed for this day
+		if (daysForecasts.length === 0) {
+			return undefined;
+		}
+
+		//Summarize all the rain from the matching days
+		return daysForecasts
+			.map(function (item) {
+				return Object.values(item.rain)[0];
+			})
+			.reduce(function (a, b) {
+				return a + b;
+			}, 0);
+	},
+
+	processSnow: function(forecast, allForecasts) {
+		if (!isNaN(forecast.snow)) {
+			return forecast.snow;
+		}
+
+		//Find all forecasts that is for the same day
+		var checkDateTime = forecast.dt_txt ? moment(forecast.dt_txt, "YYYY-MM-DD hh:mm:ss") : moment(forecast.dt, "X");
+		var daysForecasts = allForecasts.filter(function (item) {
+			var itemDateTime = item.dt_txt ? moment(item.dt_txt, "YYYY-MM-DD hh:mm:ss") : moment(item.dt, "X");
+			return itemDateTime.isSame(checkDateTime, "day") && item.snow instanceof Object;
+		});
+
+		//If no rain this day return undefined so it wont be displayed for this day
+		if (daysForecasts.length === 0) {
+			return undefined;
+		}
+
+		//Summarize all the rain from the matching days
+		return daysForecasts
+			.map(function (item) {
+				return Object.values(item.snow)[0];
+			})
+			.reduce(function (a, b) {
+				return a + b;
+			}, 0);
 	}
 });
