@@ -74,7 +74,7 @@ Module.register("weather_plus",{
 
 	// Define required scripts.
 	getStyles: function () {
-		return ["weather-icons.css"];
+		return false;
 	},
 	
 	// Define required translations.
