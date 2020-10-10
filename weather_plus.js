@@ -68,6 +68,15 @@ Module.register("weather_plus",{
 	// create a variable to hold the location name based on the API result.
 	fetchedLocationName: "",
 
+	getScripts: function () {
+		return ["moment.js"];
+	},
+
+	// Define required scripts.
+	getStyles: function () {
+		return ["weather-icons.css"];
+	},
+	
 	// Define required translations.
 	getTranslations: function () {
 		// The translations for the default modules are defined in the core translation files.
