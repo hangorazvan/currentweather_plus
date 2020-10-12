@@ -66,7 +66,7 @@ Module.register("weather_plus",{
 	firstEvent: false,
 
 	// create a variable to hold the location name based on the API result.
-	fetchedLocationName: "",
+	fetchedLocationName: config.location,
 
 	getScripts: function () {
 		return ["moment.js"];
