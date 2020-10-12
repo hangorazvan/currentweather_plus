@@ -102,13 +102,13 @@ Module.register("weather_plus",{
 		this.indoorHumidity = null;
 		this.weatherType = null;
 		this.feelsLike = null;
-		this.minTemp = null;								// min temperature.
-		this.maxTemp = null;								// max temperature.
-		this.desc = null;	 								// weather description.
-		this.rain = null;	 								// rain.
-		this.snow = null;	 								// snow.
-		this.pressure = null;	 							// main pressure.
-		this.visibility = null;	 							// visibility.
+		this.minTemp = null;			// min temperature.
+		this.maxTemp = null;			// max temperature.
+		this.desc = null;	 			// weather description.
+		this.rain = null;	 			// rain.
+		this.snow = null;	 			// snow.
+		this.pressure = null;	 		// main pressure.
+		this.visibility = null;	 		// visibility.
 		this.loaded = false;
 		this.scheduleUpdate(this.config.initialLoadDelay);
 	},
@@ -139,7 +139,7 @@ Module.register("weather_plus",{
 			windDirection.className = "sups";
 			if (this.config.showWindDirectionAsArrow) {
 				if (this.windDeg !== null) {
-					windDirection.innerHTML = "<i class=\"fa fa-long-arrow-down\" style=\"transform:rotate("+this.windDeg+"deg);\"></i>";
+					windDirection.innerHTML = '<i class="fa fa-long-arrow-down" style="transform:rotate(' + this.windDeg + 'deg);"></i>';
 				}
 			} else {
 				windDirection.innerHTML = this.translate(this.windDirection);
@@ -154,9 +154,9 @@ Module.register("weather_plus",{
 
 			var pressure = document.createElement("span"); 			// main pressure.
 			var atpressure = Math.round(this.pressure * 750.062 / 1000)
-				if (atpressure < 700) {
+				if (atpressure < 745) {
 				    pressure.className = "pressure lightblue";
-				} else if (atpressure > 800) {
+				} else if (atpressure > 775) {
 				    pressure.className = "pressure yellow";
 				} else pressure.className = "pressure";
 			pressure.innerHTML = Math.round(this.pressure * 750.062 / 1000) + "<span class=\"subs\"> Hg</span><span class=\"sups\">mm</span>";
@@ -173,7 +173,6 @@ Module.register("weather_plus",{
 			visibility.innerHTML = this.visibility / 1000 + "<span class=\"subs\"> km</span> ";
 			small.appendChild(visibility);
 		}
-
 //		var spacer = document.createElement("span");
 //		spacer.innerHTML = "&nbsp;";
 //		small.appendChild(spacer);
@@ -202,7 +201,6 @@ Module.register("weather_plus",{
 			small.appendChild(sunriseSunsetIcon);
 
 			var sunriseSunsetTime = document.createElement("span");
-			sunriseSunsetTime.className = "wiss";
 			sunriseSunsetTime.innerHTML = " " + this.sunriseSunsetTime;
 			small.appendChild(sunriseSunsetTime);
 		}
@@ -262,7 +260,7 @@ Module.register("weather_plus",{
 			large.appendChild(weatherIcon);
 
 			var temperature = document.createElement("span");
-			temperature.className = "wtemp bright light xlarge ";
+			temperature.className = "wtemp bright light xlarge";
 			temperature.innerHTML = " " + this.temperature.replace(".", this.config.decimalSymbol) + "&deg;<span class=\"deg shade\">" + degreeLabel + "</span>";
 			large.appendChild(temperature);
 		}
@@ -291,9 +289,10 @@ Module.register("weather_plus",{
 
 		wrapper.appendChild(large);
 
+
 		if (this.config.showFeelsLike && this.config.onlyTemp === false) {
 			var small = document.createElement("div");
-			small.className = "normal ssmall rfd ";
+			small.className = "normal medium rfd ";
 
 			var feelsLike = document.createElement("span");
 						if (this.config.units == "metric") {
@@ -402,7 +401,7 @@ Module.register("weather_plus",{
 					var event = payload[e];
 					if (event.location || event.geo) {
 						this.firstEvent = event;
-						//Log.log("First upcoming event with location: ", event);
+					//	Log.log("First upcoming event with location: ", event);
 						break;
 					}
 				}
@@ -573,10 +572,9 @@ Module.register("weather_plus",{
 					break;
 			}
 		} else {
-		//	this.feelsLike = parseFloat(this.temperature).toFixed(0);
 			this.feelsLike = parseFloat(data.main.feels_like).toFixed(0);
 		}
-
+		
 		this.windDirection = this.deg2Cardinal(data.wind.deg);
 		this.windDeg = data.wind.deg;
 		this.weatherType = this.config.iconTable[data.weather[0].icon];
@@ -609,10 +607,12 @@ Module.register("weather_plus",{
 		this.sunriseSunsetTime = timeString;
 		this.sunriseSunsetIcon = sunrise < now && sunset > now ? "wi-sunset" : "wi-sunrise";
 
-		this.show(this.config.animationSpeed, { lockString: this.identifier });
-		this.loaded = true;
-		this.updateDom(this.config.animationSpeed);
-		this.sendNotification("CURRENTWEATHER_DATA", { data: data });
+		if (!this.hidden) {
+			this.show(this.config.animationSpeed, { lockString: this.identifier });
+			this.loaded = true;
+			this.updateDom(this.config.animationSpeed);
+			this.sendNotification("CURRENTWEATHER_DATA", { data: data });
+		}
 	},
 
 	/* scheduleUpdate()
@@ -627,7 +627,8 @@ Module.register("weather_plus",{
 		}
 
 		var self = this;
-		setTimeout(function () {
+		clearTimeout(this.updateTimer);
+		this.updateTimer = setTimeout(function () {
 			self.updateWeather();
 		}, nextLoad);
 	},
