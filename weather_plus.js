@@ -607,12 +607,10 @@ Module.register("weather_plus",{
 		this.sunriseSunsetTime = timeString;
 		this.sunriseSunsetIcon = sunrise < now && sunset > now ? "wi-sunset" : "wi-sunrise";
 
-		if (!this.hidden) {
-			this.show(this.config.animationSpeed, { lockString: this.identifier });
-			this.loaded = true;
-			this.updateDom(this.config.animationSpeed);
-			this.sendNotification("CURRENTWEATHER_DATA", { data: data });
-		}
+		this.show(this.config.animationSpeed, { lockString: this.identifier });
+		this.loaded = true;
+		this.updateDom(this.config.animationSpeed);
+		this.sendNotification("CURRENTWEATHER_DATA", { data: data });
 	},
 
 	/* scheduleUpdate()
