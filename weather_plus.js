@@ -530,7 +530,7 @@ Module.register("weather_plus",{
 				break;
 		}
 
-		if (this.realFeelsLike) {
+		if (!this.realFeelsLike) {
 			if (windInMph > 3 && tempInF < 50) {
 				// windchill
 				var windChillInF = Math.round(35.74 + 0.6215 * tempInF - 35.75 * Math.pow(windInMph, 0.16) + 0.4275 * tempInF * Math.pow(windInMph, 0.16));
