@@ -20,6 +20,7 @@ Module.register("weather_plus",{
 		showIndoorTemperature: false,
 		showIndoorHumidity: false,
 		showFeelsLike: true,
+		realFeelsLike: true,
 
 		showPressure: true,
 		showVisibility: true,
@@ -529,49 +530,52 @@ Module.register("weather_plus",{
 				break;
 		}
 
-		if (windInMph > 3 && tempInF < 50) {
-			// windchill
-			var windChillInF = Math.round(35.74 + 0.6215 * tempInF - 35.75 * Math.pow(windInMph, 0.16) + 0.4275 * tempInF * Math.pow(windInMph, 0.16));
-			var windChillInC = (windChillInF - 32) * (5 / 9);
-			// this.feelsLike = windChillInC.toFixed(0);
+		if (this.realFeelsLike) {
+			if (windInMph > 3 && tempInF < 50) {
+				// windchill
+				var windChillInF = Math.round(35.74 + 0.6215 * tempInF - 35.75 * Math.pow(windInMph, 0.16) + 0.4275 * tempInF * Math.pow(windInMph, 0.16));
+				var windChillInC = (windChillInF - 32) * (5 / 9);
 
-			switch (this.config.units) {
-				case "metric":
-					this.feelsLike = windChillInC.toFixed(0);
-					break;
-				case "imperial":
-					this.feelsLike = windChillInF.toFixed(0);
-					break;
-				case "default":
-					this.feelsLike = (windChillInC + 273.15).toFixed(0);
-					break;
-			}
-		} else if (tempInF > 80 && this.humidity > 40) {
-			// heat index
-			var Hindex =
-				-42.379 +
-				2.04901523 * tempInF +
-				10.14333127 * this.humidity -
-				0.22475541 * tempInF * this.humidity -
-				6.83783 * Math.pow(10, -3) * tempInF * tempInF -
-				5.481717 * Math.pow(10, -2) * this.humidity * this.humidity +
-				1.22874 * Math.pow(10, -3) * tempInF * tempInF * this.humidity +
-				8.5282 * Math.pow(10, -4) * tempInF * this.humidity * this.humidity -
-				1.99 * Math.pow(10, -6) * tempInF * tempInF * this.humidity * this.humidity;
+				switch (this.config.units) {
+					case "metric":
+						this.feelsLike = windChillInC.toFixed(0);
+						break;
+					case "imperial":
+						this.feelsLike = windChillInF.toFixed(0);
+						break;
+					case "default":
+						this.feelsLike = (windChillInC + 273.15).toFixed(0);
+						break;
+				}
+			} else if (tempInF > 80 && this.humidity > 40) {
+				// heat index
+				var Hindex =
+					-42.379 +
+					2.04901523 * tempInF +
+					10.14333127 * this.humidity -
+					0.22475541 * tempInF * this.humidity -
+					6.83783 * Math.pow(10, -3) * tempInF * tempInF -
+					5.481717 * Math.pow(10, -2) * this.humidity * this.humidity +
+					1.22874 * Math.pow(10, -3) * tempInF * tempInF * this.humidity +
+					8.5282 * Math.pow(10, -4) * tempInF * this.humidity * this.humidity -
+					1.99 * Math.pow(10, -6) * tempInF * tempInF * this.humidity * this.humidity;
 
-			switch (this.config.units) {
-				case "metric":
-					this.feelsLike = parseFloat((Hindex - 32) / 1.8).toFixed(0);
-					break;
-				case "imperial":
-					this.feelsLike = Hindex.toFixed(0);
-					break;
-				case "default":
-					var tc = parseFloat((Hindex - 32) / 1.8) + 273.15;
-					this.feelsLike = tc.toFixed(0);
-					break;
+				switch (this.config.units) {
+					case "metric":
+						this.feelsLike = parseFloat((Hindex - 32) / 1.8).toFixed(0);
+						break;
+					case "imperial":
+						this.feelsLike = Hindex.toFixed(0);
+						break;
+					case "default":
+						var tc = parseFloat((Hindex - 32) / 1.8) + 273.15;
+						this.feelsLike = tc.toFixed(0);
+						break;
+				}
+			} else {
+				this.feelsLike = parseFloat(this.temperature).toFixed(0);
 			}
-		} else {
+		} else { 
 			this.feelsLike = parseFloat(data.main.feels_like).toFixed(0);
 		}
 		
@@ -607,8 +611,10 @@ Module.register("weather_plus",{
 		this.sunriseSunsetTime = timeString;
 		this.sunriseSunsetIcon = sunrise < now && sunset > now ? "wi-sunset" : "wi-sunrise";
 
-		this.show(this.config.animationSpeed, { lockString: this.identifier });
-		this.loaded = true;
+		if (!this.loaded) {
+			this.show(this.config.animationSpeed, { lockString: this.identifier });
+			this.loaded = true;
+		}
 		this.updateDom(this.config.animationSpeed);
 		this.sendNotification("CURRENTWEATHER_DATA", { data: data });
 	},
