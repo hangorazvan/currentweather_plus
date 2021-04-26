@@ -11,7 +11,7 @@ Then put in config.js
 
 
 	{
-		module: "weatherforecast_plus",
+		module: "weather_plus",
 		position: "top_right",
 		config: {
 			showPressure: true,
