@@ -5,13 +5,11 @@ https://github.com/hangorazvan/weather_plus
 Modified MagicMirror2 currentweather based on Openweathermap with Onecall endpoint
 
 <img src=https://github.com/hangorazvan/weather_plus/blob/master/preview.png>
-Do not make modification and do not replace the default, just add <i>disable: true</i> in config.js and use this one as 3rd party,
-
-Then put in config.js
+Do not make modification and do not replace the default, just add <i>disable: true</i> in config.js and use this one as 3rd party, then put in config.js:
 
 
 	{
-		module: "openweather",
+		module: "weather_plus",
 		position: "top_right",
 		config: {
 			showFeelsLike: true,
