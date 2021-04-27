@@ -21,6 +21,6 @@ Do not make modification and do not replace the default, just add <i>disable: tr
 			showUvi: true,
 			showPrecip: true,
 			showDescription: true,
-							// See currentweather default module 'Configuration options' for more information.
+				// See currentweather default module 'Configuration options' for more information.
 		}
 	}
