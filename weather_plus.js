@@ -1,7 +1,7 @@
 /* Magic Mirror
- * Module: CurrentWeather
- *
- * By Michael Teeuw https://michaelteeuw.nl
+ * Module: Weather Plus
+ * By Răzvan Cristea 
+ * https://github.com/hangorazvan
  * MIT Licensed.
  */
 Module.register("weather_plus", {
@@ -95,10 +95,7 @@ Module.register("weather_plus", {
 
 	// Define required translations.
 	getTranslations() {
-		return {
-			en: "en.json",
-			ro: "ro.json"
-		};
+		return null;
 	},
 
 	// Define start sequence.
@@ -177,7 +174,7 @@ Module.register("weather_plus", {
 			pressureIcon.className = "wi wi-thermometer";
 			small.appendChild(pressureIcon);
 
-			var pressure = document.createElement("span"); 			// main pressure.
+			var pressure = document.createElement("span"); 				// pressure.
 			var atpressure = Math.round(this.pressure * 750.062 / 1000)
 				if (atpressure < 745) {
 				    pressure.className = "pressure lightblue";
@@ -336,7 +333,7 @@ Module.register("weather_plus", {
 			small.className = "normal medium";
 
 			var feelsLike = document.createElement("div");
-					if (this.config.units == "metric") {
+			if (this.config.units == "metric") {				// only for metric.
 				if (this.feelsLike == -0) {this.feelsLike = 0}
 				if (this.feelsLike >= 45) {
 					feelsLike.className = "real redrf";
@@ -375,7 +372,7 @@ Module.register("weather_plus", {
 				}
 			} else feelsLike.className = "dimmed real";
 
-			feelsLike.innerHTML = this.translate("FEELS") + this.feelsLike + "&deg;" + degreeLabel;
+			feelsLike.innerHTML = this.translate("FEELS!") + this.feelsLike + "&deg;" + degreeLabel;
 			small.appendChild(feelsLike);
 		}
 
@@ -406,7 +403,7 @@ Module.register("weather_plus", {
 			prepIcon.className = "wi wi-raindrop";
 			small.appendChild(prepIcon);
 
-			var precipitation = document.createElement("span");	// precipitation under construction
+			var precipitation = document.createElement("span");	// precipitation
 			precipitation.className = "small";
 			if (this.precipitation > 0) {
 				if(config.units === "imperial") {
@@ -526,8 +523,11 @@ Module.register("weather_plus", {
 			params += "lat=" + this.config.lat + "&lon=" + this.config.lon;
 		} else if (this.firstEvent && this.firstEvent.geo) {
 			params += "lat=" + this.firstEvent.geo.lat + "&lon=" + this.firstEvent.geo.lon;
+		} else if (this.firstEvent && this.firstEvent.location) {
+			params += "q=" + this.firstEvent.location;
 		} else {
 			this.hide(this.config.animationSpeed, { lockString: this.identifier });
+			Log.error(self.name + ": Latitude and longitude not set!");
 			return;
 		}
 
@@ -535,18 +535,18 @@ Module.register("weather_plus", {
 		params += "&lang=" + this.config.lang;
 		params += "&APPID=" + this.config.appid;
 
-        if (this.config.type === "current") {
-            params += "&exclude=minutely,hourly,daily";
-        }
-        else if (this.config.type === "hourly") {
-            params += "&exclude=current,minutely,daily";
-        }
-        else if (this.config.type === "daily") {
-            params += "&exclude=current,minutely,hourly";
-        }
-        else {
-            params += "&exclude=minutely";
-        }
+		if (this.config.type === "current") {
+			params += "&exclude=minutely,hourly,daily";
+		}
+		else if (this.config.type === "hourly") {
+			params += "&exclude=current,minutely,daily";
+		}
+		else if (this.config.type === "daily") {
+			params += "&exclude=current,minutely,hourly";
+		}
+		else {
+			params += "&exclude=minutely";
+		}
 
 		return params;
 	},
@@ -673,17 +673,13 @@ Module.register("weather_plus", {
 		var sunriseSunsetDateObject = sunrise < now && sunset > now ? sunset : sunrise;
 		var timeString = moment(sunriseSunsetDateObject).format("HH:mm");
 		if (this.config.timeFormat !== 24) {
-			//var hours = sunriseSunsetDateObject.getHours() % 12 || 12;
 			if (this.config.showPeriod) {
 				if (this.config.showPeriodUpper) {
-					//timeString = hours + moment(sunriseSunsetDateObject).format(':mm A');
 					timeString = moment(sunriseSunsetDateObject).format("h:mm A");
 				} else {
-					//timeString = hours + moment(sunriseSunsetDateObject).format(':mm a');
 					timeString = moment(sunriseSunsetDateObject).format("h:mm a");
 				}
 			} else {
-				//timeString = hours + moment(sunriseSunsetDateObject).format(':mm');
 				timeString = moment(sunriseSunsetDateObject).format("h:mm");
 			}
 		}
