@@ -1,101 +1,82 @@
-.weather_plus .wtemp {
-	position: relative;
-	top: -10px;
-	letter-spacing: -5px;
-	padding-left: 10px;
-}
-
-.weather_plus .deg {
-	position: absolute;
-	top: 27px;
-	right: 4px;
-	font-size: 55%;
-	font-weight: 400;
-}
-
-.weather_plus .real {
-	position: relative;
-	top: -10px;
-	margin-bottom: -10px;
-}
-
-.weather_plus .rfd {
-	margin-bottom: 5px;
-}
-
-.weather_plus .wicon {
-	position: relative;
-	top: 15px;
-	height: 70px;
-	float: left;
-}
-
-.weather_plus .wi-thermometer,
-.weather_plus .wi-humidity,
-.weather_plus .wi-sunset,
-.weather_plus .wi-sunrise {
-	font-size: 65%;
-	padding: 0 3px;
-}
-
-.weather_plus .wi-alien {
-	position: relative;
-	top: -2px;
-	font-size: 75%;
-	color: violet;
-	padding: 0 2px;
-}
-
-.weather_plus .pressure {
-	margin-right: -10px;
-}
-
-.weather_plus .pressure sub {
-	position: relative;
-	top: -5px;
-	left: -16px;
+.weather_plus .subs {
 	font-size: 50%;
 }
 
-.weather_plus .wi-thermometer {
-	position: relative;
-	top: -1px;
-	color: gold;
-}
-
-.weather_plus .maxTemp {
-	color: tomato;
-}
-
-.weather_plus .minTemp {
-	color: skyblue;
-}
-
-.weather_plus .minMax {
-	color: silver;
-}
-
-.weather_plus .wi-humidity,
-.weather_plus .wi-raindrop {
-	position: relative;
-	top: -2px;
-	color: skyblue;
-}
-
-.weather_plus .wi-sunset,
-.weather_plus .wi-sunrise {
-	position: relative;
-	top: -2px;
-	color: goldenrod;
+.weather_plus .sups {
+	display: inline-block;
+	transform: translate(-25px, -7px) scale(0.5);
+	margin-right: -20px;
 }
 
 .weather_plus .wi-strong-wind {
 	color: cyan;
 }
 
+.weather_plus .wi-thermometer, 
+.weather_plus .wi-humidity, 
+.weather_plus .wi-alien, 
+.weather_plus .wi-sunset, 
+.weather_plus .wi-sunrise,
+.weather_plus .fa-binoculars {
+	display: inline-block;
+	transform: scale(0.65);
+}
+
+.weather_plus .wi-thermometer {
+	color: gold;
+	margin-top: 5px;
+}
+
+.weather_plus .fa-binoculars {
+	color: violet;
+}
+
+.weather_plus .wi-raindrop {
+	transform: translate(0, 5px) scale(0.85);
+}
+
+.weather_plus .dew,
+.weather_plus .wi-humidity, 
+.weather_plus .wi-raindrop {
+	color: skyblue;
+}
+
+.weather_plus .uvi,
+.weather_plus .wi-sunset, 
+.weather_plus .wi-sunrise {
+	color: gold;
+}
+
+.weather_plus .xlarge {
+	display: inline-block;
+	transform: translate(-5px, -5px);
+	letter-spacing: -5px;
+	padding-right: 3px;
+}
+
+.weather_plus .real {
+	margin-bottom: -5px;
+}
+
+.weather_plus .weathericon {
+	transform: translate(0, 20px);
+	height: 70px;
+	float: left;
+}
+
+.weather_plus .deg {
+	font-size: 50%;
+	font-weight: 400;
+	margin-left: -33px;
+}
+
+.weather_plus .bright::first-letter {
+	text-transform: capitalize;
+}
+
 .weather_plus .wi-day-sunny {
 	content: url("icons/clear.png");
-	transform: scale(1.4);
+	transform: translate(0, 15px) scale(1.4);
 }
 
 .weather_plus .wi-day-cloudy {
@@ -106,33 +87,33 @@
 	content: url("icons/cloudy.png");
 }
 
-.weather_plus .wi-day-cloudy-windy {
+.weather_plus .wi-cloudy-windy {
 	content: url("icons/mostlycloudy.png");
 }
 
-.weather_plus .wi-day-showers {
+.weather_plus .wi-showers {
 	content: url("icons/chancerain.png");
 }
 
-.weather_plus .wi-day-rain {
+.weather_plus .wi-rain {
 	content: url("icons/rain.png");
 }
 
-.weather_plus .wi-day-thunderstorm {
+.weather_plus .wi-thunderstorm {
 	content: url("icons/tstorms.png");
 }
 
-.weather_plus .wi-day-snow {
+.weather_plus .wi-snow {
 	content: url("icons/snow.png");
 }
 
-.weather_plus .wi-day-fog {
+.weather_plus .wi-fog {
 	content: url("icons/cloudy.png");
 }
 
 .weather_plus .wi-night-clear {
 	content: url("icons/nt_clear.png");
-	transform: scale(1.5);
+	transform: translate(0, 15px) scale(1.6);
 }
 
 .weather_plus .wi-night-alt-cloudy {
