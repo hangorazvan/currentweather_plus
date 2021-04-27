@@ -90,7 +90,7 @@ Module.register("weather_plus", {
 
 	// Define required scripts.
 	getStyles() {
-		return ["weather_plus.css", "font-awesome.css"];
+		return ["weather_plus.css", "font-awesome.css", "weather-icons.css"];
 	},
 
 	// Define required translations.
