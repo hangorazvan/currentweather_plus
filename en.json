@@ -1,6 +1,7 @@
 {
-	"No rain": "No rain",
-	"No snow": "No snow",
+	"DEW": "Dew point: ",
+	"UVI": "UV index: ",
+	"No prep": "No precip",
 
 	"N": "N",
 	"NNE": "NNE",
@@ -19,11 +20,5 @@
 	"NW": "NW",
 	"NNW": "NNW",
 
-	"DEW": "Dew point: ",
-	"UVI": "UV index: ",
-	"No prep": "No precip",
-
-	"FEELS!": "Feels like: ",	
-	"FEELS": "Feels like: {DEGREE}",
-	"PRECIP": "Precipitation"
+	"FEELS": "Feels like: "
 }

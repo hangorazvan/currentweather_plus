@@ -375,7 +375,7 @@ Module.register("weather_plus", {
 				}
 			} else feelsLike.className = "dimmed real";
 
-			feelsLike.innerHTML = this.translate("FEELS!") + this.feelsLike + "&deg;" + degreeLabel;
+			feelsLike.innerHTML = this.translate("FEELS") + this.feelsLike + "&deg;" + degreeLabel;
 			small.appendChild(feelsLike);
 		}
 

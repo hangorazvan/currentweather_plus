@@ -1,6 +1,7 @@
 {
-	"No rain": "Nu plouă",
-	"No snow": "Nu ninge",
+	"DEW": "Punct de rouă: ",
+	"UVI": "Index UV: ",
+	"No prep": "Fără precip",
 
 	"N": "N",
 	"NNE": "NNE",
@@ -19,11 +20,5 @@
 	"NW": "NV",
 	"NNW": "NNV",
 
-	"DEW": "Punct de rouă: ",
-	"UVI": "Index UV: ",
-	"No prep": "Fără precip",
-
-	"FEELS!": "Se simte ca fiind: ",	
-	"FEELS": "Se simte ca fiind: {DEGREE}",
-	"PRECIP": "Precipitații"
+	"FEELS": "Se simte ca fiind: "
 }
