@@ -18,6 +18,6 @@ Then put in config.js
 			showVisibility: true,
 			showMinMax: true,
 			showDescription: true,
-							// See weatherforeast default module 'Configuration options' for more information.
+							// See currentweather default module 'Configuration options' for more information.
 		}
 	}
