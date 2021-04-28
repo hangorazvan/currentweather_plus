@@ -49,7 +49,7 @@ Module.register("weather_plus", {
 		useLocationAsHeader: false,
 
 		calendarClass: "calendar",
-		tableClass: "medium",
+//		tableClass: "medium",
 
 		onlyTemp: false,
 		hideTemp: false,
@@ -84,22 +84,25 @@ Module.register("weather_plus", {
 	fetchedLocationName: config.location,
 
 	// Define required scripts.
-	getScripts() {
+	getScripts: function () {
 		return ["moment.js"];
 	},
 
 	// Define required scripts.
-	getStyles() {
+	getStyles: function () {
 		return ["weather_plus.css", "font-awesome.css", "weather-icons.css"];
 	},
 
 	// Define required translations.
-	getTranslations() {
-		return null;
+	getTranslations: function () {
+		return {
+			en: "en.json",
+			ro: "ro.json"
+		};
 	},
 
 	// Define start sequence.
-	start() {
+	start: function () {
 		Log.info("Starting module: " + this.name);
 
 		// Set locale.
@@ -128,7 +131,7 @@ Module.register("weather_plus", {
 
 	// add extra information of current weather
 	// windDirection, humidity, sunrise and sunset
-	addExtraInfoWeather(wrapper) {
+	addExtraInfoWeather: function (wrapper) {
 		var small = document.createElement("div");
 		small.className = "normal medium";
 
@@ -247,9 +250,9 @@ Module.register("weather_plus", {
 	},
 
 	// Override dom generator.
-	getDom() {
+	getDom: function () {
 		var wrapper = document.createElement("div");
-		wrapper.className = this.config.tableClass;
+//		wrapper.className = this.config.tableClass;
 
 		if (this.config.appid === "") {
 			wrapper.innerHTML = "Please set the correct openweather <i>appid</i> in the config for module: " + this.name + ".";
@@ -378,7 +381,7 @@ Module.register("weather_plus", {
 
 		if (this.config.showDew) {
 			var dew = document.createElement("span"); 			// dew point.
-			dew.className = "small dew";
+			dew.className = "dew midget";
 			dew.innerHTML = this.translate("DEW") + this.dew.toFixed(1) + "&deg;" + degreeLabel;
 			small.appendChild(dew);
 		}
@@ -389,7 +392,7 @@ Module.register("weather_plus", {
 
 		if (this.config.showUvi) {
 			var uvi = document.createElement("span"); 			// uv index.
-			uvi.className = "small uvi";
+			uvi.className = "uvi midget";
 			uvi.innerHTML = this.translate("UVI") + this.uvi.toFixed(1);
 			small.appendChild(uvi);
 		}
@@ -400,11 +403,15 @@ Module.register("weather_plus", {
 			small.appendChild(spacer);
 
 			var prepIcon = document.createElement("div");
-			prepIcon.className = "wi wi-raindrop";
+			if (this.precipitation > 0) {
+				prepIcon.className = "wi wi-raindrop";
+			} else {
+				prepIcon.className = "wi wi-small-craft-advisory";
+			}
 			small.appendChild(prepIcon);
 
 			var precipitation = document.createElement("span");	// precipitation
-			precipitation.className = "small";
+			precipitation.className = "prep midget";
 			if (this.precipitation > 0) {
 				if(config.units === "imperial") {
 					precipitation.innerHTML = " " + (this.precipitation / 25.4).toFixed(2).replace(".", this.config.decimalSymbol) + " in";
@@ -419,7 +426,7 @@ Module.register("weather_plus", {
 
 		if (this.config.showDescription) {
 			var description = document.createElement("div"); 	// weather description.
-			description.className = "bright medium";
+			description.className = "bright";
 			description.innerHTML = this.desc;
 			small.appendChild(description);
 		}
@@ -430,7 +437,7 @@ Module.register("weather_plus", {
 	},
 
 	// Override getHeader method.
-	getHeader() {
+	getHeader: function () {
 		if (this.config.useLocationAsHeader && this.config.location !== false) {
 			return this.config.location;
 		}
@@ -444,7 +451,7 @@ Module.register("weather_plus", {
 	},
 
 	// Override notification handler.
-	notificationReceived(notification, payload, sender) {
+	notificationReceived: function (notification, payload, sender) {
 		if (notification === "DOM_OBJECTS_CREATED") {
 			if (this.config.appendLocationNameToHeader) {
 				this.hide(0, { lockString: this.identifier });
@@ -479,7 +486,7 @@ Module.register("weather_plus", {
 	 * Requests new data from openweather.org.
 	 * Calls processWeather on succesfull response.
 	 */
-	updateWeather() {
+	updateWeather: function () {
 		if (this.config.appid === "") {
 			Log.error("CurrentWeather: APPID not set!");
 			return;
@@ -517,7 +524,7 @@ Module.register("weather_plus", {
 	 *
 	 * return String - URL params.
 	 */
-	getParams() {
+	getParams: function () {
 		var params = "?";
 		if (this.config.lat && this.config.lon) {
 			params += "lat=" + this.config.lat + "&lon=" + this.config.lon;
@@ -556,7 +563,7 @@ Module.register("weather_plus", {
 	 *
 	 * argument data object - Weather information received form openweather.org.
 	 */
-	processWeather(data) {
+	processWeather: function (data) {
 		if (!data || !data.current || typeof data.current.temp === "undefined") {
 			// Did not receive usable new data.
 			// Maybe this needs a better check?
@@ -700,7 +707,7 @@ Module.register("weather_plus", {
 	 *
 	 * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
 	 */
-	scheduleUpdate(delay) {
+	scheduleUpdate: function (delay) {
 		var nextLoad = this.config.updateInterval;
 		if (typeof delay !== "undefined" && delay >= 0) {
 			nextLoad = delay;
@@ -724,7 +731,7 @@ Module.register("weather_plus", {
 	 *
 	 * return number - Windspeed in beaufort.
 	 */
-	ms2Beaufort(ms) {
+	ms2Beaufort: function (ms) {
 		var kmh = (ms * 60 * 60) / 1000;
 		var speeds = [1, 5, 11, 19, 28, 38, 49, 61, 74, 88, 102, 117, 1000];
 		for (var beaufort in speeds) {
@@ -736,7 +743,7 @@ Module.register("weather_plus", {
 		return 12;
 	},
 
-	deg2Cardinal(deg) {
+	deg2Cardinal: function (deg) {
 		if (deg > 11.25 && deg <= 33.75) {
 			return "NNE";
 		} else if (deg > 33.75 && deg <= 56.25) {
@@ -779,7 +786,7 @@ Module.register("weather_plus", {
 	 *
 	 * return string - Rounded Temperature.
 	 */
-	roundValue(temperature) {
+	roundValue: function (temperature) {
 		var decimals = this.config.roundTemp ? 0 : 1;
 		var roundValue = parseFloat(temperature).toFixed(decimals);
 		return roundValue === "-0" ? 0 : roundValue;
