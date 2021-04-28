@@ -1,3 +1,8 @@
+.midget {
+  font-size: 1.2rem;
+  line-height: 1.237;
+}
+
 .weather_plus .subs {
 	font-size: 50%;
 }
@@ -32,7 +37,12 @@
 }
 
 .weather_plus .wi-raindrop {
-	transform: translate(0, 5px) scale(0.85);
+	transform: translate(0, 4px) scale(0.85);
+}
+
+.weather_plus .wi-small-craft-advisory {
+	transform: translate(0, 2px) scale(0.75);
+	color: lime;
 }
 
 .weather_plus .dew,
