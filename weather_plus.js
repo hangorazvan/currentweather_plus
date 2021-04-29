@@ -139,6 +139,23 @@ Module.register("weather_plus", {
 		windIcon.className = "wi wi-strong-wind";
 		small.appendChild(windIcon);
 
+		var spacer = document.createElement("span");
+		spacer.innerHTML = "&nbsp;";
+		small.appendChild(spacer);
+
+		if (this.config.showWindDirection) {
+			var windDirection = document.createElement("span");
+			windDirection.className = "wind";
+			if (this.config.showWindDirectionAsArrow) {
+				if (this.windDeg !== null) {
+					windDirection.innerHTML = "<i class=\"wi wi-direction-down\" style=\"transform:rotate(" + this.windDeg + "deg);\"></i>";
+				}
+			} else {
+				windDirection.innerHTML = this.translate(this.windDirection);
+			}
+			small.appendChild(windDirection);
+		}
+
 		var windSpeed = document.createElement("span");
 		if (this.windSpeed > 50 && this.windSpeed < 75) {
 			windSpeed.className = "lightblue";
@@ -154,19 +171,6 @@ Module.register("weather_plus", {
 		windSpeedUnit.className = "subs";
 		windSpeedUnit.innerHTML = " km/h";
 		small.appendChild(windSpeedUnit);
-
-		if (this.config.showWindDirection) {
-			var windDirection = document.createElement("span");
-			windDirection.className = "sups";
-			if (this.config.showWindDirectionAsArrow) {
-				if (this.windDeg !== null) {
-					windDirection.innerHTML = '<i class="fa fa-long-arrow-down" style="transform:rotate(' + this.windDeg + 'deg);"></i>';
-				}
-			} else {
-				windDirection.innerHTML = this.translate(this.windDirection);
-			}
-			small.appendChild(windDirection);
-		}
 
 		var spacer = document.createElement("span");
 		spacer.innerHTML = " &nbsp; ";
