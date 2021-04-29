@@ -7,24 +7,24 @@
 Module.register("weather_plus", {
 	// Default module config.
 	defaults: {
-		lat: config.latitude,
-		lon: config.longitude,
-		appid: config.appid2,
+		lat: "",
+		lon: "",
+		appid: "",
 		units: config.units,
 		updateInterval: 10 * 60 * 1000, // every 10 minutes
-		animationSpeed: config.animation,
+		animationSpeed: 1000,
 		timeFormat: config.timeFormat,
-		showPeriod: config.period,
-		showPeriodUpper: config.period,
+		showPeriod: false,
+		showPeriodUpper: false,
 		showWindDirection: true,
 		showWindDirectionAsArrow: true,
 		useBeaufort: false,
 		useKMPHwind: true,
 		lang: config.language,
-		decimalSymbol: config.decimal,
+		decimalSymbol: ".",
 		showHumidity: false,
 		showSun: false,
-		degreeLabel: config.scale,
+		degreeLabel: true,
 		showIndoorTemperature: false,
 		showIndoorHumidity: false,
 		showFeelsLike: true,
@@ -38,10 +38,10 @@ Module.register("weather_plus", {
 		showDescription: true,
 
 		initialLoadDelay: 0, // 0 seconds delay
-		retryDelay: config.delay,
+		retryDelay: 2500,
 
-		apiVersion: config.apiVersion,
-		apiBase: config.apiBase,
+		apiVersion: "2.5/",
+		apiBase: https://api.openweathermap.org/data/,
 		weatherEndpoint: "onecall",
 		type: "current",
 
@@ -53,7 +53,7 @@ Module.register("weather_plus", {
 
 		onlyTemp: false,
 		hideTemp: false,
-		roundTemp: config.roundTemp,
+		roundTemp: false,
 
 		iconTable: {
 			"01d": "day-sunny",
