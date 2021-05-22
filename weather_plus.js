@@ -22,7 +22,6 @@ Module.register("weather_plus", {
 		useKMPHwind: true,
 		lang: config.language,
 		decimalSymbol: ".",
-		showHumidity: false,
 		showSun: false,
 		degreeLabel: true,
 		showIndoorTemperature: false,
