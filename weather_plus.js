@@ -40,7 +40,7 @@ Module.register("weather_plus", {
 		retryDelay: 2500,
 
 		apiVersion: "2.5/",
-		apiBase: https://api.openweathermap.org/data/,
+		apiBase: "https://api.openweathermap.org/data/",
 		weatherEndpoint: "onecall",
 		type: "current",
 
